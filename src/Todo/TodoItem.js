@@ -18,7 +18,8 @@ const styles = {
 }
 
 function TodoItem({todo, index, onChange}) {
-    // передаем ссылку на функцию через контекст
+    // передаем ссылку на функцию через контекст (глобальная область видимости)
+    // https://www.youtube.com/watch?v=QPEB3ZQLTZY&list=PLqKQF2ojwm3n6YO3BDSQIg35GGKn_ImFD&index=3
     const {removeTodo} = useContext(Context)
 
     const classes = []

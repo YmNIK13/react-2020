@@ -15,8 +15,10 @@ function App() {
     const [todos, setTodos] = React.useState([])
     const [loading, setLoading] = React.useState(true)
 
-    // вторым параметром передаем второй массив зависимостей
-    // так как у нас таких зависимостей нет то передаем пустой массив
+      /* Хук для подгрузки данных
+    https://www.youtube.com/watch?v=hwPo6OLBbD8&list=PLqKQF2ojwm3n6YO3BDSQIg35GGKn_ImFD&index=2
+    вторым параметром передаем список(переменные) зависимостей от которых будет перерисовываться компонент
+    так как у нас таких зависимостей нет то передаем пустой массив */
     useEffect(() => {
         fetch('https://jsonplaceholder.typicode.com/todos?_limit=5')
             .then(response => response.json())
