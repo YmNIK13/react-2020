@@ -18,7 +18,7 @@ function App() {
                 setTimeout(() => {
                     setTodos(json)
                     setLoading(false)
-                }, 2000)
+                }, 1500)
             })
     }, [])
 
