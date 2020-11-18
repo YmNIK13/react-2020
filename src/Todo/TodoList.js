@@ -17,12 +17,7 @@ function TodoList(props) {
         <ul style={style.ul}>
             {
                 todos.map((todo, idx) => {
-                    return <TodoItem
-                        key={todo.id}
-                        todo={todo}
-                        onChange={props.onToggle}
-                        index={idx}
-                    />
+                    return <TodoItem key={todo.id} todo={todo} index={idx}/>
                 })
             }
         </ul>
@@ -31,7 +26,6 @@ function TodoList(props) {
 
 TodoList.propTypes = {
     todos: PropTypes.arrayOf(PropTypes.object).isRequired,
-    onToggle: PropTypes.func.isRequired,
 }
 
 export default TodoList

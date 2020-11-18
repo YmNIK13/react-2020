@@ -1,8 +1,12 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useReducer} from 'react';
 import TodoList from "./Todo/TodoList";
-import Context from "./context";
 import Loader from "./Loader";
 import Modal from "./Modal/Modal";
+
+import Context from "./context";
+import reduser from "./reduser";
+
+
 
 // ленивая загрузка компонентов
 const AddTodo = React.lazy(() => new Promise(resolve => setTimeout(() => {
@@ -10,51 +14,52 @@ const AddTodo = React.lazy(() => new Promise(resolve => setTimeout(() => {
     }, 3000))
 )
 
+function getDefaultToofos() {
+    const raw = localStorage.getItem('todos') || JSON.stringify([])
+    return JSON.parse(raw)
+}
+
 function App() {
+    // используем reduser
+    // https://www.youtube.com/watch?v=l4tKCCGUeMo&list=PLqKQF2ojwm3n6YO3BDSQIg35GGKn_ImFD&index=4
+    const [state, dispatch] = useReducer(reduser, getDefaultToofos())
     // используем для хранения состояния
-    const [todos, setTodos] = React.useState([])
     const [loading, setLoading] = React.useState(true)
 
-      /* Хук для подгрузки данных
-    https://www.youtube.com/watch?v=hwPo6OLBbD8&list=PLqKQF2ojwm3n6YO3BDSQIg35GGKn_ImFD&index=2
-    вторым параметром передаем список(переменные) зависимостей от которых будет перерисовываться компонент
-    так как у нас таких зависимостей нет то передаем пустой массив */
+    /* Хук для подгрузки данных
+  https://www.youtube.com/watch?v=hwPo6OLBbD8&list=PLqKQF2ojwm3n6YO3BDSQIg35GGKn_ImFD&index=2
+  вторым параметром передаем список(переменные) зависимостей от которых будет перерисовываться компонент
+  так как у нас таких зависимостей нет то передаем пустой массив */
     useEffect(() => {
-        fetch('https://jsonplaceholder.typicode.com/todos?_limit=5')
-            .then(response => response.json())
-            .then(json => {
-                setTimeout(() => {
-                    setTodos(json)
-                    setLoading(false)
-                }, 1500)
-            })
+        if (state.length > 0) {
+            setLoading(false)
+        } else {
+            fetch('https://jsonplaceholder.typicode.com/todos?_limit=5')
+                .then(response => response.json())
+                .then(json => {
+                    setTimeout(() => {
+                        dispatch({
+                            type: 'new',
+                            payload: json
+                        })
+                        setLoading(false)
+                    }, 1500)
+                })
+        }
     }, [])
 
-    function toggleTodo(id_item) {
-        setTodos(todos.map(todo => {
-            if (todo.id === id_item) {
-                todo.completed = !todo.completed
-            }
-            return todo
-        }))
-    }
+    // сохраняем задания в сторедж
+    useEffect(() => {
+        localStorage.setItem('todos', JSON.stringify(state))
+    }, [state])
 
-    function removeTodo(todo_id) {
-        setTodos(todos.filter(todo => {
-            return todo.id !== todo_id
-        }))
-    }
 
     function addTodo(title) {
-        setTodos(todos.concat([{
-            title,
-            id: Date.now(),
-            completed: false
-        }]))
+        dispatch({type: 'add', payload: title})
     }
 
     return (
-        <Context.Provider value={{removeTodo}}>
+        <Context.Provider value={{dispatch}}>
             <div className='wrapper'>
                 <h1>React tutorial</h1>
                 <Modal/>
@@ -62,11 +67,8 @@ function App() {
                     <AddTodo onCreate={addTodo}/>
                 </React.Suspense>
                 {
-                    loading
-                        ? <Loader/>
-                        : todos.length > 0
-                        ? (<TodoList todos={todos} onToggle={toggleTodo}/>)
-                        : (<p>No todos!</p>)
+                    loading ? <Loader/>
+                        : (state.length > 0 ? (<TodoList todos={state}/>) : (<p>No todos!</p>))
                 }
             </div>
         </Context.Provider>
